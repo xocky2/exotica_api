@@ -18,27 +18,35 @@ const upload = multer({storage: storage});
 
 router.get('/', async(req,res,next)=>{
 
-    const result = await mysql.execute("select * from products;");
-    let string =JSON.stringify(result);
-    let json =JSON.parse(string);
-    let produtos = result;
+    const resultProduct = await mysql.execute("select * from product;");
+    let string =JSON.stringify(resultProduct);
+    let jsonProduct =JSON.parse(string);
+    let produtos = resultProduct;
 
-    const result2 = await mysql.execute(`select url from images where products_idproducts = ?;`,[result[0].idproducts]);
-    
-    let imgs = [];
-    result2.forEach(images2 => {
-        imgs.push(images2.url)
-    });
-    
+    let tamanho = jsonProduct.length-1;
+    console.log(tamanho)
 
-
+    for (let index = 0; index <= tamanho; index++) {
+        const result2 = await mysql.execute(`select url from image where product_idproduct = ?;`,[jsonProduct[1]['idproduct']]);
+        let string2 =JSON.stringify(result2);
+        let json2 =JSON.parse(string2);
+        let imgs = [];
+        json2.forEach(json2 => imgs.push(json2['url']) ); //cria array com as urls das imagens
+            
+    }
+    /* 
+    const result2 = await mysql.execute(`select url from image where product_idproduct = ?;`,[jsonProduct[1]['idproduct']]);
     let string2 =JSON.stringify(result2);
     let json2 =JSON.parse(string2);
-
-    const response = {
+    let imgs = []; 
+    json2.forEach(json2 => imgs.push(json2['url']) ); //cria array com as urls das imagens
+    */
+   
+   let  response = {
         status: 200,
-        products: json.map(product =>{
+        products: jsonProduct.map(product =>{
             return {
+                
                 id: product.idproducts,
                 name: product.name,
                 categoria: product.categoria,
@@ -47,6 +55,15 @@ router.get('/', async(req,res,next)=>{
             }
         })
     }
+
+    
+
+    // cria array com url das imgs 
+
+
+    
+
+     
 
     return res.status(200).send({response});
 });
