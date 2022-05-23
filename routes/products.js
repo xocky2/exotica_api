@@ -19,21 +19,35 @@ const upload = multer({storage: storage});
 router.get('/', async(req,res,next)=>{
 
     const resultProduct = await mysql.execute("select * from product;");
-    let string =JSON.stringify(resultProduct);
-    let jsonProduct =JSON.parse(string);
+    let stringProduct =JSON.stringify(resultProduct);
+    let jsonProduct =JSON.parse(stringProduct);
     let produtos = resultProduct;
 
     let tamanho = jsonProduct.length-1;
-    console.log(tamanho)
     
+
+    //adiciona images
     for (let index = 0; index <= tamanho; index++) {
-        const result2 = await mysql.execute(`select url from image where product_idproduct = ?;`,[jsonProduct[index]['idproduct']]);
-        let string2 =JSON.stringify(result2);
-        let json2 =JSON.parse(string2);
+        const resultImage = await mysql.execute(`select url from image where product_idproduct = ?;`,[jsonProduct[index]['idproduct']]);
+        let stringImage =JSON.stringify(resultImage);
+        let jsonImage =JSON.parse(stringImage);
 
         let imgs = [];
-        json2.forEach(json2 => imgs.push(json2['url']) ); //cria array com as urls das imagens
+        jsonImage.forEach(jsonImage => imgs.push(jsonImage['url']) ); //cria array com as urls das imagens
         jsonProduct[index].images = imgs;
+
+    }
+
+    //adiciona estoque
+    for (let index = 0; index <= tamanho; index++) {
+        console.log(jsonProduct[index]['idproduct'])
+        const resultStock = await mysql.execute(`select size,quantity from stock where product_idproduct=?;`,[jsonProduct[index]['idproduct']]);
+        let stringStock =JSON.stringify(resultStock);
+        let jsonStock =JSON.parse(stringStock);
+       
+        let stocks = [];
+        jsonStock.forEach(jsonStock => stocks.push({size:jsonStock['size'],quantity:jsonStock['quantity'] }) ); //cria array com as urls das imagens
+        jsonProduct[index].stock = stocks;
 
     }
     
@@ -45,7 +59,8 @@ router.get('/', async(req,res,next)=>{
                 name: product.name,
                 category: product.category,
                 price: product.price,  
-                images: product.images         
+                images: product.images,
+                stock: product.stock       
             }
         })
     }
