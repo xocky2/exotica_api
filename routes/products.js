@@ -58,9 +58,9 @@ router.get('/', async(req,res,next)=>{
                 return {
                     id: product.idproducts,
                     name: product.name,
-                    main_image: product.main_image,
                     category: product.category,
                     price: product.price,  
+                    main_image: product.main_image,
                     images: product.images,
                     stock: product.stock       
                 }
