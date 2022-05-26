@@ -17,6 +17,7 @@ const upload = multer({storage: storage});
 
 
 router.get('/', async(req,res,next)=>{
+    res.header("Access-Control-Allow-Origin", "*");
     try {
         const resultProduct = await mysql.execute("select * from product;");
         let stringProduct =JSON.stringify(resultProduct);
@@ -87,7 +88,8 @@ router.post('/', async(req,res,next)=>{
             if(resultInsertProduct){
                 let imgs = req.body.images;
                 imgs.forEach(async imgs  => {
-                    console.log(imgs);
+                   // console.log(imgs);
+                  // console.log(1);
                     const resultInsertedImage = await mysql.execute(`insert into image (url,product_idproduct) values (?,?);`,
                         [imgs,resultInsertProduct.insertId]);
 
