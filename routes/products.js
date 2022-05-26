@@ -78,7 +78,10 @@ router.get('/', async(req,res,next)=>{
 });
 
 
-router.post('/', async(req,res,next)=>{
+router.post('/',upload.single('mainImage'), async(req,res,next)=>{
+   
+        let fileName = res.req.file.filename
+
     try {
         if (req.body.name == null){
             return res.status(201).send({response: "Please enter a name for the product !! "});
@@ -86,19 +89,8 @@ router.post('/', async(req,res,next)=>{
             const resultInsertProduct = await mysql.execute(`insert into product (name,category,price,main_image,description,visible) values (?,?,?,?,?,?)`,
                         [req.body.name,req.body.category,req.body.price,req.body.main_image,req.body.description,req.body.visible]);
             if(resultInsertProduct){
-                let imgs = req.body.images;
-                imgs.forEach(async imgs  => {
-                   // console.log(imgs);
-                  // console.log(1);
-                    const resultInsertedImage = await mysql.execute(`insert into image (url,product_idproduct) values (?,?);`,
-                        [imgs,resultInsertProduct.insertId]);
-
-                    })     
-                
-                
-                
                 const resultInsertedProduct = await mysql.execute(`select name,category,price,main_image,description,visible from product where idproduct = ?;`,
-             [resultInsertProduct.insertId]);
+                [resultInsertProduct.insertId]);
                 if(resultInsertedProduct){
                     const responseInsertedProduct = {
                         status: 200,
@@ -109,7 +101,7 @@ router.post('/', async(req,res,next)=>{
                                 description: product.description,
                                 category: product.category,
                                 price: product.price,  
-                                main_image: product.main_image,
+                                mainImage: fileName,
                                 //images: product.images
                               //  stock: product.stock       
                             }
@@ -125,6 +117,7 @@ router.post('/', async(req,res,next)=>{
 
         }
     } catch (error) {
+        console.log(error);
         return res.status(500).send({error: error});
     }
 });
