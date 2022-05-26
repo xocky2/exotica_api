@@ -61,7 +61,7 @@ router.get('/', async(req,res,next)=>{
                     description: product.description,
                     category: product.category,
                     price: product.price,  
-                    main_image: product.main_image,
+                    mainImage: product.main_image,
                     images: product.images,
                     stock: product.stock       
                 }
