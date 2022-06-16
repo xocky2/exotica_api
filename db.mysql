@@ -1,0 +1,131 @@
+-- MySQL Workbench Synchronization
+-- Generated: 2022-06-15 22:54
+-- Model: New Model
+-- Version: 1.0
+-- Project: Name of the project
+-- Author: Giovanni
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+CREATE TABLE IF NOT EXISTS `heroku_d50a2c44686f1dc`.`product` (
+  `idproduct` INT(11) NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(120) NOT NULL,
+  `category` VARCHAR(45) NOT NULL,
+  `description` VARCHAR(300) NULL DEFAULT NULL,
+  `price` DECIMAL NOT NULL,
+  `status` VARCHAR(10) NOT NULL,
+  PRIMARY KEY (`idproduct`),
+  UNIQUE INDEX `idproducts_UNIQUE` (`idproduct` ASC) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `heroku_d50a2c44686f1dc`.`image` (
+  `idimage` INT(11) NOT NULL AUTO_INCREMENT,
+  `url` VARCHAR(200) NOT NULL,
+  `status` VARCHAR(10) NOT NULL,
+  `product_idproduct` INT(11) NOT NULL,
+  PRIMARY KEY (`idimage`),
+  INDEX `fk_images_products_idx` (`product_idproduct` ASC) ,
+  CONSTRAINT `fk_images_products`
+    FOREIGN KEY (`product_idproduct`)
+    REFERENCES `heroku_d50a2c44686f1dc`.`product` (`idproduct`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `heroku_d50a2c44686f1dc`.`stock` (
+  `idstock` INT(11) NOT NULL AUTO_INCREMENT,
+  `size` VARCHAR(4) NULL DEFAULT NULL,
+  `quantity` INT(11) NULL DEFAULT NULL,
+  `product_idproduct` INT(11) NOT NULL,
+  PRIMARY KEY (`idstock`),
+  UNIQUE INDEX `idstock_UNIQUE` (`idstock` ASC) ,
+  INDEX `fk_stock_product1_idx` (`product_idproduct` ASC) ,
+  CONSTRAINT `fk_stock_product1`
+    FOREIGN KEY (`product_idproduct`)
+    REFERENCES `heroku_d50a2c44686f1dc`.`product` (`idproduct`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `heroku_d50a2c44686f1dc`.`order` (
+  `idorder` INT(11) NOT NULL,
+  `status` VARCHAR(10) NOT NULL,
+  `payment_method` VARCHAR(45) NOT NULL,
+  `date` DATE NOT NULL,
+  `user_iduser` INT(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`idorder`),
+  INDEX `fk_order_user1_idx` (`user_iduser` ASC) ,
+  CONSTRAINT `fk_order_user1`
+    FOREIGN KEY (`user_iduser`)
+    REFERENCES `heroku_d50a2c44686f1dc`.`user` (`iduser`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `heroku_d50a2c44686f1dc`.`user` (
+  `iduser` INT(11) NOT NULL AUTO_INCREMENT,
+  `email` VARCHAR(45) NOT NULL,
+  `password` VARCHAR(70) NOT NULL,
+  `gender` VARCHAR(45) NULL DEFAULT NULL,
+  `telephone` VARCHAR(45) NOT NULL,
+  `cpf` VARCHAR(45) NOT NULL,
+  `status` VARCHAR(10) NOT NULL,
+  PRIMARY KEY (`iduser`),
+  UNIQUE INDEX `iduser_UNIQUE` (`iduser` ASC) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `heroku_d50a2c44686f1dc`.`product_has_order` (
+  `product_idproduct` INT(11) NOT NULL,
+  `order_idorder` INT(11) NOT NULL,
+  `quantity` INT(11) NOT NULL,
+  `size` VARCHAR(4) NOT NULL,
+  `shipping_price` DECIMAL NULL DEFAULT NULL,
+  `total_price` DECIMAL NULL DEFAULT NULL,
+  PRIMARY KEY (`product_idproduct`, `order_idorder`),
+  INDEX `fk_product_has_order_order1_idx` (`order_idorder` ASC) ,
+  INDEX `fk_product_has_order_product1_idx` (`product_idproduct` ASC) ,
+  CONSTRAINT `fk_product_has_order_product1`
+    FOREIGN KEY (`product_idproduct`)
+    REFERENCES `heroku_d50a2c44686f1dc`.`product` (`idproduct`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_product_has_order_order1`
+    FOREIGN KEY (`order_idorder`)
+    REFERENCES `heroku_d50a2c44686f1dc`.`order` (`idorder`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `heroku_d50a2c44686f1dc`.`address` (
+  `idaddress` INT(11) NOT NULL AUTO_INCREMENT,
+  `address` VARCHAR(45) NULL DEFAULT NULL,
+  `district` VARCHAR(45) NULL DEFAULT NULL,
+  `city` VARCHAR(45) NULL DEFAULT NULL,
+  `state` VARCHAR(45) NULL DEFAULT NULL,
+  `country` VARCHAR(45) NULL DEFAULT NULL,
+  `cep` VARCHAR(45) NULL DEFAULT NULL,
+  `status` VARCHAR(10) NOT NULL,
+  `user_iduser` INT(11) NOT NULL,
+  PRIMARY KEY (`idaddress`),
+  UNIQUE INDEX `idaddress_UNIQUE` (`idaddress` ASC) ,
+  INDEX `fk_address_user1_idx` (`user_iduser` ASC) ,
+  CONSTRAINT `fk_address_user1`
+    FOREIGN KEY (`user_iduser`)
+    REFERENCES `heroku_d50a2c44686f1dc`.`user` (`iduser`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('../mysql');
 const multer = require('multer');
-const { Router } = require('express');
 
 
 // armazenamento da imagem 
@@ -48,8 +47,8 @@ router.get('/',async(req,res)=>{
             let jsonStock =JSON.parse(stringStock);
         
             let stocks = [];
-            jsonStock.forEach(jsonStock => stocks.push({size:jsonStock['size'],quantity:jsonStock['quantity'] })); //cria array com as urls das imagens
-            jsonProduct[index].stock = stocks;
+            jsonStock.forEach(jsonStock => stocks.push({size:jsonStock['size'],quantity:jsonStock['quantity'] })); //cria array com dados do estoque
+            jsonProduct[index].stock = stocks
 
         }
         
@@ -84,37 +83,35 @@ router.post('/', async(req,res)=>{
         if (req.body.name == null){
             return res.status(201).send({response: "Please enter a name for the product !! "});
         }else{
-            const start = performance.now();
-            const resultInsertProduct = await mysql.execute(`insert into product (name,category,price,description,status) values (?,?,?,?,?)`,
-                        [req.body.name,req.body.category,req.body.price,req.body.description,req.body.status]);
-            const duration = performance.now() - start;
-            console.log("Duração insert produto"+duration);         
+                //INSERE O PRODUTO NO BANCO  
+                const resultInsertProduct = await mysql.execute(`insert into product (name,category,price,description,status) values (?,?,?,?,?)`,
+                [req.body.name,req.body.category,req.body.price,req.body.description,req.body.status]);
+                     
             if(resultInsertProduct){
-
-                //CADASTRA ESTOQUE
-                let stringStock =JSON.stringify(req.body.stock);
-                let jsonStock =JSON.parse(stringStock);
                 let stock = [];
-                //cria array com os estoques enviados
+                if(req.body.stock){
+                //CADASTRA ESTOQUE
+
+                //converte req stock para json
+                let stringStock =JSON.stringify(req.body.stock); 
+                let jsonStock =JSON.parse(stringStock);
+                
+
+                //cria array com o(s) estoque(s) enviado(s)
                 jsonStock.forEach(jsonStock => 
                     stock.push({
                     productid: resultInsertProduct.insertId,
                     size:jsonStock['size'],
                     quantity:jsonStock['quantity'] 
-                })); 
-                if(stock){
-                    stock.forEach(async stock => {
-                        const queryStock = `insert into stock (size,quantity,product_idproduct) values (?,?,?);`;
-                        const resultInsertedStock = await mysql.execute(queryStock,[stock['size'],stock['quantity'],stock['productid']]);
-                    });
-                }
-                const startSelect = performance.now();
+                }));
+
+            }
+
                 const resultInsertedProduct = await mysql.execute(`select idproduct,name,category,price,description,status from product where idproduct = ?;`,
                 [resultInsertProduct.insertId]);
-                const durantionSelect = performance.now() - startSelect;
-                console.log('Duração select produto: '+durantionSelect);
+                
                 if(resultInsertedProduct){
-                    const responseInsertedProduct = {
+                    const response = {
                         status: 201,
                         product: resultInsertedProduct.map(product =>{
                             return {
@@ -124,22 +121,70 @@ router.post('/', async(req,res)=>{
                                 category: product.category, 
                                 price: product.price,
                                 status: product.status,
-                                stock: stock       
+                                stock: stock ? stock :'no stock'     
                             }
                         })
 
                     }
-                    return res.status(201).send({responseInsertedProduct});
+                    return res.status(201).send({response});
                 }else{
-                    return res.status(401).send({response: {status: 401,
-                    msg: "Product not inserted"}});
+                    return res.status(401).send({
+                        response: {
+                            status: 401,
+                            msg: "Product not inserted"
+                    }});
                 }
             } // end if se cadastrouBjs
 
         }
     } catch (error) {
-        return res.status(500).send({error: error});
+        console.log("erro: "+error);
+        return res.status(500).send({erro: error});
+        
     }
+});
+
+//ATUALIZA UM PRODUTO
+router.patch('/',async(req,res)=>{
+    try {
+        if(req.body.productid === null){
+            return res.status(206).send({response: "Please enter a productid !! "});
+        }else{
+            // ATUALIZA O PRODUTO
+            const product = {
+                productid : req.body.productid,
+                name: req.body.name,
+                description: req.body.description,
+                category : req.body.category,
+                price: req.body.price,
+                status: req.body.status
+            }
+
+            //ATUALIZA NO BANCO
+            const resultUpdateProduct = await mysql.execute(`update product set name = ?,category = ?,price = ?,description = ?,status = ? where idproduct = ?`,
+            [product.name,product.category,product.price,product.description,product.status,product.productid]);
+
+            if(resultUpdateProduct){
+                console.log(resultUpdateProduct.insertId);
+                return res.status(200).send({
+                    response: "Product updated",
+                    product: product
+                });
+            }else{
+                console.log(resultUpdateProduct.insertId);
+                return res.status(304).send({
+                    response: "Product not updated",
+                });
+            }
+
+
+
+
+        }
+    } catch (error) {
+        return res.status(500).send({response:"Error : "+error});
+    }
+
 });
 
 //CADASTRA ESTOQUE
@@ -192,18 +237,6 @@ router.post('/stock', async (req,res)=>{
     } catch (error) {
         res.status(500).send({message: 'Estoque não cadastrado'})
     }
-});
-
-//ATUALIZA UM PRODUTO
-router.patch('/',async(req,res)=>{
-    try {
-        if(req.body.productid === null){
-            return res.status()
-        }
-    } catch (error) {
-        
-    }
-
 });
 
 // CADASTRA IMAGENS
