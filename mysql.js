@@ -1,5 +1,6 @@
 const mysql = require('mysql');
 
+//LOCAL CONNECTION 
 /* var pool = mysql.createPool({
     "user": "root",
     "password": "",
@@ -23,11 +24,9 @@ exports.execute=(query,params=[]) =>{
     return new Promise((resolve,reject)=>{
                 pool.query(query,params,(error,result,fields)=>{
                     if(error){
-                        console.log(error);
                         reject(error);
                     }else{
                         resolve(result);
-                        console.log(result);
                     }
                 })
            
