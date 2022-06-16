@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('../mysql');
 const multer = require('multer');
+const { Router } = require('express');
 
 
 // armazenamento da imagem 
@@ -83,9 +84,11 @@ router.post('/', async(req,res)=>{
         if (req.body.name == null){
             return res.status(201).send({response: "Please enter a name for the product !! "});
         }else{
+            const start = performance.now();
             const resultInsertProduct = await mysql.execute(`insert into product (name,category,price,description,status) values (?,?,?,?,?)`,
                         [req.body.name,req.body.category,req.body.price,req.body.description,req.body.status]);
-                        
+            const duration = performance.now() - start;
+            console.log("Duração insert produto"+duration);         
             if(resultInsertProduct){
 
                 //CADASTRA ESTOQUE
@@ -105,9 +108,11 @@ router.post('/', async(req,res)=>{
                         const resultInsertedStock = await mysql.execute(queryStock,[stock['size'],stock['quantity'],stock['productid']]);
                     });
                 }
-                
+                const startSelect = performance.now();
                 const resultInsertedProduct = await mysql.execute(`select idproduct,name,category,price,description,status from product where idproduct = ?;`,
                 [resultInsertProduct.insertId]);
+                const durantionSelect = performance.now() - startSelect;
+                console.log('Duração select produto: '+durantionSelect);
                 if(resultInsertedProduct){
                     const responseInsertedProduct = {
                         status: 201,
@@ -187,6 +192,18 @@ router.post('/stock', async (req,res)=>{
     } catch (error) {
         res.status(500).send({message: 'Estoque não cadastrado'})
     }
+});
+
+//ATUALIZA UM PRODUTO
+router.patch('/',async(req,res)=>{
+    try {
+        if(req.body.productid === null){
+            return res.status()
+        }
+    } catch (error) {
+        
+    }
+
 });
 
 // CADASTRA IMAGENS
