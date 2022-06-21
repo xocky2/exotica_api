@@ -3,17 +3,15 @@ const router = express.Router();
 const mysql = require('../mysql');
 
 
-// RETORNA TODOS PEDIDOS
+// RETORNA TODOS PEDIDOS POR EMAIL DO USER
 router.get('/', async(req,res,next)=>{
-    const response = {
-        pedidos :{
-            id: productid,
-            product: 'Calcinha sexy', 
-            quantity: 2,
-            size: 'PP'
-
-        }
+    if (req.body.email){
+        const user = req.body.email;
     }
+    
+
+
+    
 });
 
 

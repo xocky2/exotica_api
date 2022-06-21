@@ -57,7 +57,7 @@ router.get('/',async(req,res)=>{
             status: 200,
             products: jsonProduct.map(product =>{
                 return {
-                    id: product.idproducts,
+                    id: product.idproduct,
                     name: product.name,
                     description: product.description,
                     category: product.category,
@@ -147,7 +147,7 @@ router.post('/', async(req,res)=>{
 //ATUALIZA UM PRODUTO
 router.patch('/',async(req,res)=>{
     try {
-        if(req.body.productid === null){
+        if(!req.body.productid){
             return res.status(206).send({response: "Please enter a productid !! "});
         }else{
             // ATUALIZA O PRODUTO
@@ -159,11 +159,13 @@ router.patch('/',async(req,res)=>{
                 price: req.body.price,
                 status: req.body.status
             }
-
+            console.log(product);
+            const query = `update product set name = ?,category = ?,price = ?,description = ?,status = ? where idproduct = ?`;
+            console.log(query,[product.name,product.category,product.price,product.description,product.status,product.productid]);
             //ATUALIZA NO BANCO
-            const resultUpdateProduct = await mysql.execute(`update product set name = ?,category = ?,price = ?,description = ?,status = ? where idproduct = ?`,
+            const resultUpdateProduct = await mysql.execute(query,
             [product.name,product.category,product.price,product.description,product.status,product.productid]);
-
+            console.log(resultUpdateProduct);
             if(resultUpdateProduct){
                 console.log(resultUpdateProduct.insertId);
                 return res.status(200).send({
