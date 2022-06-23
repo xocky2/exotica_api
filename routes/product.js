@@ -81,9 +81,9 @@ router.get('/',async(req,res)=>{
 // CADASTRA UM PRODUTO
 router.post('/', async(req,res)=>{
     res.header("Access-Control-Allow-Origin", "*");
-    console.log(req.body.name);
+    console.log(typeof(req.body));
     try {
-        if (JSON.parse(req.body).name === null){
+        if (req.body.name === null){
             return res.status(206).send({response: "Please enter a name for the product !! "});
         }else{
                 //INSERE O PRODUTO NO BANCO  
