@@ -31,6 +31,7 @@ router.get('/',async(req,res)=>{
         //adiciona images
         for (let index = 0; index <= tamanho; index++) {
             const resultImage = await mysql.execute(`select url from image where product_idproduct = ?;`,[jsonProduct[index]['idproduct']]);
+            pool.end();
             let stringImage =JSON.stringify(resultImage);
             let jsonImage =JSON.parse(stringImage);
 
@@ -43,6 +44,7 @@ router.get('/',async(req,res)=>{
         //adiciona estoque
         for (let index = 0; index <= tamanho; index++) {
             const resultStock = await mysql.execute(`select size,quantity from stock where product_idproduct=?;`,[jsonProduct[index]['idproduct']]);
+            pool.end()
             let stringStock =JSON.stringify(resultStock);
             let jsonStock =JSON.parse(stringStock);
         
