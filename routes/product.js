@@ -43,7 +43,6 @@ router.get('/',async(req,res)=>{
         //adiciona estoque
         for (let index = 0; index <= tamanho; index++) {
             const resultStock = await mysql.execute(`select size,quantity from stock where product_idproduct=?;`,[jsonProduct[index]['idproduct']]);
-            pool.end()
             let stringStock =JSON.stringify(resultStock);
             let jsonStock =JSON.parse(stringStock);
         
