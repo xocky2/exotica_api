@@ -7,6 +7,7 @@ const mysql = require('../mysql');
 router.get('/', async(req,res,next)=>{
     if (req.body.email){
         const user = req.body.email;
+        
     }
     
 

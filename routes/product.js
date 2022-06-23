@@ -25,7 +25,7 @@ router.get('/',async(req,res)=>{
         const resultProduct = await mysql.execute(query);        
         let stringProduct =JSON.stringify(resultProduct);
         let jsonProduct =JSON.parse(stringProduct);
-       let tamanho = jsonProduct.length-1;
+        let tamanho = jsonProduct.length-1;
         
 
         //adiciona images
@@ -43,6 +43,7 @@ router.get('/',async(req,res)=>{
         //adiciona estoque
         for (let index = 0; index <= tamanho; index++) {
             const resultStock = await mysql.execute(`select size,quantity from stock where product_idproduct=?;`,[jsonProduct[index]['idproduct']]);
+            pool.end()
             let stringStock =JSON.stringify(resultStock);
             let jsonStock =JSON.parse(stringStock);
         
@@ -72,6 +73,7 @@ router.get('/',async(req,res)=>{
 
         return res.status(200).send({response});
     } catch (error) {
+        console.log("ERRO: "+error);
         return res.status(500).send({error: error})
     }
     
@@ -79,6 +81,7 @@ router.get('/',async(req,res)=>{
 
 // CADASTRA UM PRODUTO
 router.post('/', async(req,res)=>{
+    res.header("Access-Control-Allow-Origin", "*");
     try {
         if (req.body.name == null){
             return res.status(201).send({response: "Please enter a name for the product !! "});
