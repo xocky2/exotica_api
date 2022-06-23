@@ -83,7 +83,7 @@ router.post('/', async(req,res)=>{
     res.header("Access-Control-Allow-Origin", "*");
     try {
         if (req.body.name == null){
-            return res.status(201).send({response: "Please enter a name for the product !! "});
+            return res.status(206).send({response: "Please enter a name for the product !! "});
         }else{
                 //INSERE O PRODUTO NO BANCO  
                 const resultInsertProduct = await mysql.execute(`insert into product (name,category,price,description,status) values (?,?,?,?,?)`,
