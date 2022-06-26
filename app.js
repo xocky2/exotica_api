@@ -27,7 +27,10 @@ app.use((req, res, next) => {
 app.use('/user', routeUsers);
 app.use('/product', routeProducts);
 app.use('/order', routeOrders);
-app.use(cors());
+app.use(cors({
+    origin:'*',
+    methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
+}));
 app.use((req,res,next)=>{
     const erro = new Error('Ops, rota não encontrada');
     erro.status = 404;
