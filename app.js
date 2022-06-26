@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const cors = require('cors');
+// const cors = require('cors');
 const morgan = require('morgan');
 
 const routeProducts = require('./routes/product');
@@ -14,23 +14,23 @@ app.use(express.json())//apenas json de entrada no body
 //app.use(urlencoded());
 
 
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
+// app.use((req, res, next) => {
+//     res.header('Access-Control-Allow-Origin', '*');
 
-    if (req.method === 'OPTIONS') {
-        res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
-        return res.status(200).send("Ta enviando o OPTIONS PORRA");
-    }
-    next();
-});
+//     if (req.method === 'OPTIONS') {
+//         res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
+//         return res.status(200).send("Ta enviando o OPTIONS PORRA");
+//     }
+//     next();
+// });
 
 app.use('/user', routeUsers);
 app.use('/product', routeProducts);
 app.use('/order', routeOrders);
-app.use(cors({
-    origin:'*',
-    methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
-}));
+// app.use(cors({
+//     origin:'*',
+//     methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
+// }));
 app.use((req,res,next)=>{
     const erro = new Error('Ops, rota não encontrada');
     erro.status = 404;
