@@ -89,7 +89,7 @@ router.post('/', async(req,res)=>{
                 //INSERE O PRODUTO NO BANCO  
                 const resultInsertProduct = await mysql.execute(`insert into product (name,category,price,description,status) values (?,?,?,?,?)`,
                 [req.body.name,req.body.category,req.body.price,req.body.description,req.body.status]);
-                     
+                
             if(resultInsertProduct){
                 let stock = [];
                 if(req.body.stock){
