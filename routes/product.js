@@ -83,9 +83,9 @@ router.post('/', async(req,res)=>{
     res.header("Access-Control-Allow-Origin", "*");
     console.log(typeof(req.body));
     try {
-        if (req.body.name == null){
-            return res.status(206).send({response: "Please enter a name for the product !! "});
-        }else{
+        // if (req.body.name == null){
+        //     return res.status(206).send({response: "Please enter a name for the product !! "});
+        // }else{
                 //INSERE O PRODUTO NO BANCO  
                 const resultInsertProduct = await mysql.execute(`insert into product (name,category,price,description,status) values (?,?,?,?,?)`,
                 [req.body.name,req.body.category,req.body.price,req.body.description,req.body.status]);
@@ -139,7 +139,7 @@ router.post('/', async(req,res)=>{
                 }
             } // end if se cadastrouBjs
 
-        }
+        //}
     } catch (error) {
         console.log("erro: "+error);
         return res.status(500).send({erro: error});
