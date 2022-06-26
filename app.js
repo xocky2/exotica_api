@@ -10,7 +10,7 @@ const routeOrders = require('./routes/order');
 app.use(morgan('dev'));
 app.use('/uploads', express.static('uploads'));
 app.use(express.urlencoded({ extended: false })) //apenas dados simples
-app.use(express.json())//apenas json de entrada no body
+//app.use(express.json())//apenas json de entrada no body
 
 
 app.use((req, res, next) => {
