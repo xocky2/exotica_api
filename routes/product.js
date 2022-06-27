@@ -94,7 +94,7 @@ router.post('/', async(req,res)=>{
                 let stock = [];
                 if(req.body.stock){
                 //CADASTRA ESTOQUE
-
+                    
                 //converte req stock para json
                 let stringStock =JSON.stringify(req.body.stock); 
                 let jsonStock =JSON.parse(stringStock);
@@ -107,9 +107,15 @@ router.post('/', async(req,res)=>{
                     size:jsonStock['size'],
                     quantity:jsonStock['quantity'] 
                 }));
-
             }
-
+            console.log(stock);
+            if(stock){
+                stock.forEach(async stock => {
+                    const queryStock = `insert into stock (size,quantity,product_idproduct) values (?,?,?);`;
+                    const resultInsertedStock = await mysql.execute(queryStock,[stock['size'],stock['quantity'],stock['productid']]);
+                    console.log(resultInsertedStock);
+                });
+            }
                 const resultInsertedProduct = await mysql.execute(`select idproduct,name,category,price,description,status from product where idproduct = ?;`,
                 [resultInsertProduct.insertId]);
                 
