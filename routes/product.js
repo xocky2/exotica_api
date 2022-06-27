@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('../mysql');
 const multer = require('multer');
+const { Router } = require('express');
 
 
 // armazenamento da imagem 
@@ -80,12 +81,10 @@ router.get('/',async(req,res)=>{
 
 // CADASTRA UM PRODUTO
 router.post('/', async(req,res)=>{
-    // res.header("Access-Control-Allow-Origin", "*");
-    console.log(typeof(req.body));
     try {
-        // if (req.body.name == null){
-        //     return res.status(206).send({response: "Please enter a name for the product !! "});
-        // }else{
+         if (req.body.name == null){
+             return res.status(206).send({response: "Please enter a name for the product !! "});
+         }else{
                 //INSERE O PRODUTO NO BANCO  
                 const resultInsertProduct = await mysql.execute(`insert into product (name,category,price,description,status) values (?,?,?,?,?)`,
                 [req.body.name,req.body.category,req.body.price,req.body.description,req.body.status]);
@@ -145,7 +144,7 @@ router.post('/', async(req,res)=>{
                 }
             } // end if se cadastrouBjs
 
-        //}
+        }
     } catch (error) {
         console.log("erro: "+error);
         return res.status(500).send({erro: error});
@@ -153,6 +152,30 @@ router.post('/', async(req,res)=>{
     }
 });
 
+//DELETA UM PRODUTO
+
+router.delete('/',async(req,res)=>{
+    try {
+        if (req.body.productid){
+            const resultDeletedProduct = await mysql.execute(`DELETE FROM PRODUCT WHERE IDPRODUCT = ?;`,[req.body.productid]);
+                if (resultDeletedProduct.affectedRows){
+                    return res.status(200).send({
+                        product: req.body.productid,
+                        message: "Product deleted"
+                    })
+                }else{
+                    return res.status(500).send({
+                        product: req.body.productid,
+                        message: "Product not deleted"
+                    })
+                }
+        }
+    } catch (error) {
+        return req.status(500).send({Erro: error})
+    }
+
+
+});
 //ATUALIZA UM PRODUTO
 router.patch('/',async(req,res)=>{
     try {
