@@ -3,6 +3,7 @@ const router = express.Router();
 const mysql = require('../mysql');
 const multer = require('multer');
 const { Router } = require('express');
+const login = require('../middleware/jwt');
 
 
 // armazenamento da imagem 
@@ -20,7 +21,6 @@ const upload = multer({storage: storage});
 
 // RETORNA TODOS OS PRODUTOS
 router.get('/',async(req,res)=>{
-    res.header("Access-Control-Allow-Origin", "*");
     try {
         const query = `SELECT * FROM PRODUCT`;
         const resultProduct = await mysql.execute(query);        
@@ -80,7 +80,7 @@ router.get('/',async(req,res)=>{
 });
 
 // CADASTRA UM PRODUTO
-router.post('/', async(req,res)=>{
+router.post('/',login.adm, async(req,res)=>{
     try {
          if (req.body.name == null){
              return res.status(206).send({response: "Please enter a name for the product !! "});
@@ -142,7 +142,7 @@ router.post('/', async(req,res)=>{
                             msg: "Product not inserted"
                     }});
                 }
-            } // end if se cadastrouBjs
+            }
 
         }
     } catch (error) {
@@ -153,8 +153,7 @@ router.post('/', async(req,res)=>{
 });
 
 //DELETA UM PRODUTO
-
-router.delete('/',async(req,res)=>{
+router.delete('/',login.adm,async(req,res)=>{
     try {
         if (req.body.productid){
             const resultDeletedProduct = await mysql.execute(`DELETE FROM PRODUCT WHERE IDPRODUCT = ?;`,[req.body.productid]);
@@ -176,8 +175,9 @@ router.delete('/',async(req,res)=>{
 
 
 });
+
 //ATUALIZA UM PRODUTO
-router.patch('/',async(req,res)=>{
+router.patch('/',login.adm,async(req,res)=>{
     try {
         if(!req.body.productid){
             return res.status(206).send({response: "Please enter a productid !! "});
@@ -223,7 +223,6 @@ router.patch('/',async(req,res)=>{
 
 //CADASTRA ESTOQUE
 router.post('/stock', async (req,res)=>{
-    
     let stringStock =JSON.stringify(req.body);
     let jsonStock =JSON.parse(stringStock);
     let stock = [];
@@ -244,28 +243,7 @@ router.post('/stock', async (req,res)=>{
             console.log('Invalido');
         }
     });
-
-
-
-    // const jsonStock = {
-    //     productid: req.body.productid,
-    //     size: req.body.size,
-    //     quantity: req.body.quantity
-    // }
-    
-    // const stock = {
-    //     item: map(item =>{
-    //         return {
-    //             productid: req.body.productid,
-    //             size: req.body.size,
-    //             quantity: req.body.quantity     
-    //         }
-    //     })
-
-    // }
-    //console.log(stock);
-    
-    
+ 
     try {
         res.status(200).send(stock)
     } catch (error) {
@@ -274,11 +252,24 @@ router.post('/stock', async (req,res)=>{
 });
 
 // CADASTRA IMAGENS
-router.post('/images',upload.array('image',4), async(req,res)=>{
-    let fileName = res.req.files
+router.post('/images',login.adm,upload.single('image'), async(req,res)=>{
+    let fileName = res.req.file
     console.log(fileName)
-    return  res.status(200).send(fileName);
-});
+    try {
+        const insertImage = await mysql.execute(`INSERT INTO IMAGE (URL,STATUS,PRODUCT_IDPRODUCT) VALUES (?,?,?)`,[fileName.path,req.body.status,req.body.idproduct]);
+        console.log(insertImage);
+        if(insertImage.insertId >0){
+            return  res.status(200).send({message: 'Image inserted',url : fileName.path});
+        }
+        return  res.status(200).send(fileName.path);       
+    } catch (error) {
+        console.log(error);
+        return  res.status(500).send({message: 'Error on upload image'+error});
+    }
 
+
+    
+
+});
 
 module.exports = router;

@@ -13,20 +13,6 @@ app.use(express.urlencoded({ extended: false })) //apenas dados simples
 app.use(express.json())//apenas json de entrada no body
 app.use(cors());
 
-//app.use(urlencoded());
-// app.use((req, res, next) => {
-//     res.header('Access-Control-Allow-Origin', '*');
-//     if (req.method === 'OPTIONS') {
-//         res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
-//         return res.status(200).send("Ta enviando o OPTIONS PORRA");
-//     }
-//     next();
-// });
-// app.use(cors({
-//     origin:'*',
-//     methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
-// }));
-
 
 
 app.use('/user', routeUsers);

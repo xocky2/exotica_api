@@ -1,14 +1,14 @@
 const mysql = require('mysql');
 
 //LOCAL CONNECTION 
-/* var pool = mysql.createPool({
-    "user": "root",
-    "password": "",
-    "database": "exotica_db",
-    "host": "localhost",
-    "port" : 3306,
-    "connectionLimit": 1000
-}); */
+//  var pool = mysql.createPool({
+//     "user": "root",
+//     "password": "",
+//     "database": "exotica_db",
+//     "host": "localhost",
+//     "port" : 3306,
+//     "connectionLimit": 1000
+// }); 
 
 
 var pool = mysql.createPool({

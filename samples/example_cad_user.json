@@ -1,0 +1,19 @@
+{
+    "email": "giovanni@gmail.com",
+    "pwd": "1234",
+    "name": "Giovanni Rios Barros",
+    "gender": "Male",
+    "telephone": "(15) 99835-2088",
+    "cpf": "462284018-90",
+    "status": "ACTIVE",
+    "address":{
+        "name": "Casa Itapeva",
+        "address": "Rua Iguape, 266",
+        "district": "Vila Aparecida",
+        "city": "Itapeva",
+        "state":"SP",
+        "country": "Brasil",
+        "cep": "18205-700",
+        "status":"ACTIVE"
+    }
+}
