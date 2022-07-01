@@ -7,7 +7,7 @@ exports.adm = async (req,res,next)=>{
     if (!token) return res.status(401).json({ auth: false, message: 'No token provided.' });
     const decode = jwt.verify(token,process.env.SECRET);
     req.user = decode;
-    const resultAdm = await mysql.execute(`SELECT status FROM USER WHERE IDUSER = ?`,[req.user.id]);
+    const resultAdm = await mysql.execute(`SELECT status FROM user WHERE IDUSER = ?`,[req.user.id]);
     
     if(resultAdm.length >0){
       console.log(resultAdm[0].status);

@@ -7,7 +7,7 @@ const login = require('../middleware/jwt');
 router.get('/',login.login, async(req,res,next)=>{
     try {
         if (req.body.iduser){
-            const selectOrders =  await mysql.execute(`SELECT * FROM EXOTICA_DB.ORDER WHERE USER_IDUSER = ? ;`,
+            const selectOrders =  await mysql.execute(`SELECT * FROM exotica_db.order WHERE USER_IDUSER = ? ;`,
             [req.body.iduser]);
             if(selectOrders.length >0){
                // console.log(selectOrders);
@@ -16,7 +16,7 @@ router.get('/',login.login, async(req,res,next)=>{
                 for (let index = 0; index < selectOrders.length; index++) {
                     pedido_produto = [...selectOrders];
                     console.log(pedido_produto[index]);
-                    const addProducts = await mysql.execute(`SELECT * FROM PRODUCT_HAS_ORDER WHERE order_idorder = ? `,
+                    const addProducts = await mysql.execute(`SELECT * FROM product_has_order WHERE order_idorder = ? `,
                     [selectOrders[index].idorder]);
                     if(addProducts.length>0){
                     
@@ -67,7 +67,7 @@ router.post('/',login.login,async(req,res,next)=>{
             let testStock = req.body.products;
             let invalidStock = [];
             for (let index = 0; index < testStock.length; index++) {
-                const validateStock = await mysql.execute(`SELECT quantity FROM STOCK WHERE PRODUCT_IDPRODUCT = ? AND SIZE = ?`,
+                const validateStock = await mysql.execute(`SELECT quantity FROM stock WHERE PRODUCT_IDPRODUCT = ? AND SIZE = ?`,
                 [testStock[index]['idproduct'],testStock[index]['size']]);
                 if(validateStock.length){
                     if (validateStock[0].quantity < testStock[index]['quantity']){
@@ -96,7 +96,7 @@ router.post('/',login.login,async(req,res,next)=>{
                 return  res.status(500).send({response});
             }else{
                 try {
-                    const insertPaymentMethod = await mysql.execute(`INSERT INTO PAYMENT_METHOD (TYPE, CARDNUMBER, CARDNAME, EXPIRATIONMONTH, EXPIRATIONYEAR, PORTION,PIX_KEY, boleto_number)  VALUES ( ? , ? , ? , ? , ? , ?, ?, ? ) ;`,
+                    const insertPaymentMethod = await mysql.execute(`INSERT INTO payment_method (TYPE, CARDNUMBER, CARDNAME, EXPIRATIONMONTH, EXPIRATIONYEAR, PORTION,PIX_KEY, boleto_number)  VALUES ( ? , ? , ? , ? , ? , ?, ?, ? ) ;`,
                     [req.body.pay.type,
                         req.body.pay.cardNumber,
                         req.body.pay.cardName,
@@ -109,7 +109,7 @@ router.post('/',login.login,async(req,res,next)=>{
                         if(insertPaymentMethod.insertId>0){
                             let insertOrder1,insertOrder2;
                             if(req.body.user_address_id != null){
-                                insertOrder1 = await mysql.execute(`INSERT INTO EXOTICA_DB.ORDER (STATUS,DATE,TOTAL_PRICE,SHIPPING_PRICE,USER_IDUSER,ADDRESS_IDADDRESS,PAYMENT_METHOD_IDPAYMENT_METHOD) VALUES ( ?,?,?,?,?,?,?); `,
+                                insertOrder1 = await mysql.execute(`INSERT INTO exotica_db.order (STATUS,DATE,TOTAL_PRICE,SHIPPING_PRICE,USER_IDUSER,ADDRESS_IDADDRESS,PAYMENT_METHOD_IDPAYMENT_METHOD) VALUES ( ?,?,?,?,?,?,?); `,
                                 [req.body.status,
                                 req.body.date,
                                 req.body.total_price,
@@ -118,7 +118,7 @@ router.post('/',login.login,async(req,res,next)=>{
                                 req.body.user_address_id,
                                 insertPaymentMethod.insertId]);
                             }else{
-                                const insertAddress = await mysql.execute(`INSERT INTO ADDRESS (NAME,ADDRESS,DISTRICT,CITY,STATE,COUNTRY,CEP,STATUS,USER_IDUSER) VALUES (?,?,?,?,?,?,?,?,?)`,
+                                const insertAddress = await mysql.execute(`INSERT INTO address (NAME,ADDRESS,DISTRICT,CITY,STATE,COUNTRY,CEP,STATUS,USER_IDUSER) VALUES (?,?,?,?,?,?,?,?,?)`,
                                 [req.body.shipping_address.name,
                                 req.body.shipping_address.address,
                                 req.body.shipping_address.district,
@@ -130,7 +130,7 @@ router.post('/',login.login,async(req,res,next)=>{
                                 req.body.iduser]);
 
                                 if(insertAddress.insertId>0){
-                                     insertOrder2 = await mysql.execute(`INSERT INTO EXOTICA_DB.ORDER (STATUS,DATE,TOTAL_PRICE,SHIPPING_PRICE,USER_IDUSER,ADDRESS_IDADDRESS,PAYMENT_METHOD_IDPAYMENT_METHOD) VALUES ( ?,?,?,?,?,?,?); `,
+                                     insertOrder2 = await mysql.execute(`INSERT INTO exotica_db.order (STATUS,DATE,TOTAL_PRICE,SHIPPING_PRICE,USER_IDUSER,ADDRESS_IDADDRESS,PAYMENT_METHOD_IDPAYMENT_METHOD) VALUES ( ?,?,?,?,?,?,?); `,
                                     [req.body.status,
                                     req.body.date,
                                     req.body.total_price,
@@ -149,17 +149,17 @@ router.post('/',login.login,async(req,res,next)=>{
                                let itens =  req.body.products;
 
                                for (let index = 0; index < itens.length; index++) {
-                                const insertItem = await mysql.execute(`INSERT INTO PRODUCT_HAS_ORDER (PRODUCT_IDPRODUCT,ORDER_IDORDER,QUANTITY,SIZE) values (?,?,?,?)`,
+                                const insertItem = await mysql.execute(`INSERT INTO product_has_order (PRODUCT_IDPRODUCT,ORDER_IDORDER,QUANTITY,SIZE) values (?,?,?,?)`,
                                 [itens[index].idproduct,
                                 idorder,
                                 itens[index].quantity,
                                 itens[index].size]);
                                 if (insertItem.affectedRows > 0){
-                                    const selectQuantity = await mysql.execute(`SELECT quantity FROM STOCK WHERE PRODUCT_IDPRODUCT = ? AND SIZE = ?`,
+                                    const selectQuantity = await mysql.execute(`SELECT quantity FROM stock WHERE PRODUCT_IDPRODUCT = ? AND SIZE = ?`,
                                     [itens[index]['idproduct'],itens[index]['size']]);
                                     let curbal = selectQuantity[0].quantity - itens[index].quantity;
                                     console.log(`Item: ${itens[index]['idproduct']}\nTamanho: ${itens[index]['size']}\nSaldo anterior :${selectQuantity[0].quantity}\nQuantidade pedido: ${itens[index].quantity}\nSaldo atual: ${curbal}`) 
-                                     const updateStock = await mysql.execute(`UPDATE STOCK SET QUANTITY = ? WHERE PRODUCT_IDPRODUCT = ? AND SIZE = ?`,
+                                     const updateStock = await mysql.execute(`UPDATE stock SET QUANTITY = ? WHERE PRODUCT_IDPRODUCT = ? AND SIZE = ?`,
                                      [curbal,
                                      itens[index]['idproduct'],
                                      itens[index]['size']]);

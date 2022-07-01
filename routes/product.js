@@ -22,7 +22,7 @@ const upload = multer({storage: storage});
 // RETORNA TODOS OS PRODUTOS
 router.get('/',async(req,res)=>{
     try {
-        const query = `SELECT * FROM PRODUCT`;
+        const query = `SELECT * FROM product`;
         const resultProduct = await mysql.execute(query);        
         let stringProduct =JSON.stringify(resultProduct);
         let jsonProduct =JSON.parse(stringProduct);
@@ -156,7 +156,7 @@ router.post('/',login.adm, async(req,res)=>{
 router.delete('/',login.adm,async(req,res)=>{
     try {
         if (req.body.productid){
-            const resultDeletedProduct = await mysql.execute(`DELETE FROM PRODUCT WHERE IDPRODUCT = ?;`,[req.body.productid]);
+            const resultDeletedProduct = await mysql.execute(`DELETE FROM product WHERE IDPRODUCT = ?;`,[req.body.productid]);
                 if (resultDeletedProduct.affectedRows){
                     return res.status(200).send({
                         product: req.body.productid,
@@ -256,7 +256,7 @@ router.post('/images',login.adm,upload.single('image'), async(req,res)=>{
     let fileName = res.req.file
     console.log(fileName)
     try {
-        const insertImage = await mysql.execute(`INSERT INTO IMAGE (URL,STATUS,PRODUCT_IDPRODUCT) VALUES (?,?,?)`,[fileName.path,req.body.status,req.body.idproduct]);
+        const insertImage = await mysql.execute(`INSERT INTO image (URL,STATUS,PRODUCT_IDPRODUCT) VALUES (?,?,?)`,[fileName.path,req.body.status,req.body.idproduct]);
         console.log(insertImage);
         if(insertImage.insertId >0){
             return  res.status(200).send({message: 'Image inserted',url : fileName.path});

@@ -12,11 +12,11 @@ router.get('/', async(req,res,next)=>{
 router.post('/', async(req,res,next)=>{
     try {
         if (req.body.email && req.body.pwd){
-            const insertUser = await mysql.execute(`INSERT INTO USER (EMAIL,PASSWORD,NAME,GENDER,TELEPHONE,CPF,STATUS) VALUES (?,?,?,?,?,?,?);`,
+            const insertUser = await mysql.execute(`INSERT INTO user (EMAIL,PASSWORD,NAME,GENDER,TELEPHONE,CPF,STATUS) VALUES (?,?,?,?,?,?,?);`,
             [req.body.email,req.body.pwd,req.body.name,req.body.gender,req.body.telephone,req.body.cpf,req.body.status])
             if (insertUser.insertId >0){
                 if(req.body.address){
-                    const insertAddress = await mysql.execute(`INSERT INTO ADDRESS (NAME,ADDRESS,DISTRICT,CITY,STATE,COUNTRY,CEP,STATUS,USER_IDUSER) VALUES (?,?,?,?,?,?,?,?,?)`,
+                    const insertAddress = await mysql.execute(`INSERT INTO address (NAME,ADDRESS,DISTRICT,CITY,STATE,COUNTRY,CEP,STATUS,USER_IDUSER) VALUES (?,?,?,?,?,?,?,?,?)`,
                                 [req.body.address.name,
                                 req.body.address.address,
                                 req.body.address.district,
