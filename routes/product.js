@@ -62,6 +62,7 @@ router.get('/',async(req,res)=>{
                     name: product.name,
                     description: product.description,
                     category: product.category,
+                    subcategory: product.subcategory,
                     price: product.price,  
                     images: product.images,
                     stock: product.stock       
@@ -86,8 +87,8 @@ router.post('/',login.adm, async(req,res)=>{
              return res.status(206).send({response: "Please enter a name for the product !! "});
          }else{
                 //INSERE O PRODUTO NO BANCO  
-                const resultInsertProduct = await mysql.execute(`insert into product (name,category,price,description,status) values (?,?,?,?,?)`,
-                [req.body.name,req.body.category,req.body.price,req.body.description,req.body.status]);
+                const resultInsertProduct = await mysql.execute(`insert into product (name,category,subcategory,price,description,status) values (?,?,?,?,?,?)`,
+                [req.body.name,req.body.category,req.body.subcategory,req.body.price,req.body.description,req.body.status]);
                 
             if(resultInsertProduct){
                 let stock = [];
@@ -115,7 +116,7 @@ router.post('/',login.adm, async(req,res)=>{
                     console.log(resultInsertedStock);
                 });
             }
-                const resultInsertedProduct = await mysql.execute(`select idproduct,name,category,price,description,status from product where idproduct = ?;`,
+                const resultInsertedProduct = await mysql.execute(`select idproduct,name,category,subcategory,price,description,status from product where idproduct = ?;`,
                 [resultInsertProduct.insertId]);
                 
                 if(resultInsertedProduct){
@@ -127,6 +128,7 @@ router.post('/',login.adm, async(req,res)=>{
                                 name: product.name,
                                 description: product.description,
                                 category: product.category, 
+                                subcategory: product.subcategory, 
                                 price: product.price,
                                 status: product.status,
                                 stock: stock ? stock :'no stock'     
@@ -192,11 +194,11 @@ router.patch('/',login.adm,async(req,res)=>{
                 status: req.body.status
             }
             console.log(product);
-            const query = `update product set name = ?,category = ?,price = ?,description = ?,status = ? where idproduct = ?`;
-            console.log(query,[product.name,product.category,product.price,product.description,product.status,product.productid]);
+            const query = `update product set name = ?,category = ?,subcategory = ?,price = ?,description = ?,status = ? where idproduct = ?`;
+            console.log(query,[product.name,product.category,product.subcategory,product.price,product.description,product.status,product.productid]);
             //ATUALIZA NO BANCO
             const resultUpdateProduct = await mysql.execute(query,
-            [product.name,product.category,product.price,product.description,product.status,product.productid]);
+            [product.name,product.category,product.subcategory,product.price,product.description,product.status,product.productid]);
             console.log(resultUpdateProduct);
             if(resultUpdateProduct){
                 console.log(resultUpdateProduct.insertId);

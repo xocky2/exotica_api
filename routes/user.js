@@ -12,6 +12,10 @@ router.get('/', async(req,res,next)=>{
 router.post('/', async(req,res,next)=>{
     try {
         if (req.body.email && req.body.pwd){
+            const selectEmail =  await mysql.execute(`SELECT email from user where email = ?`,[[req.body.email]])
+            if (selectEmail.length >0){
+                return res.status(206).send({messag: `E-mail ${req.body.email} already registered`});
+            } 
             const insertUser = await mysql.execute(`INSERT INTO user (EMAIL,PASSWORD,NAME,GENDER,TELEPHONE,CPF,STATUS) VALUES (?,?,?,?,?,?,?);`,
             [req.body.email,req.body.pwd,req.body.name,req.body.gender,req.body.telephone,req.body.cpf,req.body.status])
             if (insertUser.insertId >0){
@@ -51,7 +55,8 @@ router.post('/login', async(req,res,next)=>{
     try {
         if(req.body.email && req.body.pwd){
             const validateUser = await mysql.execute (`select * from user where email = ? and password = ?`,[req.body.email,req.body.pwd]);
-            if(validateUser[0].iduser){
+            console.log(validateUser.length);
+            if(validateUser.length > 0){
                 const token = jwt.sign({
                  id: validateUser[0].iduser,
                  email:  validateUser[0].email,
@@ -62,15 +67,51 @@ router.post('/login', async(req,res,next)=>{
                 expiresIn: "48h" // expires in 48min
                 }
             );
-            return res.status(200).send({auth: true, token: token });
+
+
+            const selectAddress = await mysql.execute(`select * from address where user_iduser = ?`,[validateUser[0].iduser]);
+            if(selectAddress.length > 0){
+                let address = [];
+                for (let index = 0; index < selectAddress.length; index++) {
+                    address.push({
+                        idaddress: selectAddress[index].idaddress,
+                        name: selectAddress[index].name,
+                        address: selectAddress[index].address,
+                        district: selectAddress[index].district,
+                        city: selectAddress[index].city,
+                        state: selectAddress[index].state,
+                        country: selectAddress[index].country,
+                        cep: selectAddress[index].cep,
+                        status: selectAddress[index].status
+                    });
+                    console.log(address);
+                }
+                const response = {
+                    auth: true,
+                    token: token,
+                    user: validateUser.map(validateUser => {
+                        return{
+                            iduser: validateUser.iduser,
+                            email: validateUser.email,
+                            name: validateUser.name,
+                            gender: validateUser.gender,
+                            telephone: validateUser.telephone,
+                            cpf: validateUser.cpf,
+                            status: validateUser.status,
+                            address: address
+
+
+                        }
+                })}
+                return res.status(200).send(response);
+            }
+            
             }else{
                 res.status(500).json({message: 'Login inválido!'});
             }
-
-        
-            //auth ok
-            
-            
+            //auth ok 
+          }else{
+            res.status(500).json({message: 'Login inválido!'});
           }
           
     } catch (error) {

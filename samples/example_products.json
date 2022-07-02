@@ -1,37 +1,17 @@
 {
-  "response": {
-      "status": 200,
-      "products": [
-          {
-              "id": 1,
-              "name": "Calcinha",
-              "description": "Esta é uma calcinha bonita e confortavel",
-              "category": "Moda intima",
-              "price": 29.9,
-              "images": [
-           "https://img.ltwebstatic.com/images3_pi/2022/01/24/1643019603f602a64578e9c62ac9539eb0da5c762c_thumbnail_600x.webp",
-    "https://img.ltwebstatic.com/images3_pi/2022/01/24/1643019603f602a64578e9c62ac9539eb0da5c762c_thumbnail_600x.webp"
-              ],
-              "stock": [
-                  {
-                      "size": "G",
-                      "quantity": 1
-                  },
-                  {
-                      "size": "M",
-                      "quantity": 0
-                  }
-              ],
-              "comments": [
-                {
-
-                  "name": "Giovanni Rios Barros",
-                  "comment": "Gostei muito desse produto, ótimo encaixe",
-                  "date": "29-06-2022"
-
-                }
-              ]
-          }
-      ]
-  }
+  "name": "Calcinha XPTY",
+  "description": "A calcinha XPTY é  melhor calcinha do mercado, pois além de não enrolar, não incomoda mesmo após um dia de cansativo",
+  "category": "Moda Íntima",
+  "price": 599.99,
+  "status": "ACTIVE",
+  "stock": [
+      {
+          "quantity": 1,
+          "size": "M"
+      },
+      {
+          "quantity": 2,
+          "size": "G" 
+      }
+  ]
 }

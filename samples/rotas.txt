@@ -1,0 +1,9 @@
+
+Necessário o header nas rotas ( menos na get produtos, cadastro e login de usuário ):
+x-access-token: "jwt gerado no login"
+
+http://localhost:3000/product/images
+http://localhost:3000/product/
+http://localhost:3000/order
+http://localhost:3000/user
+http://localhost:3000/user/login
