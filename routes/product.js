@@ -4,7 +4,32 @@ const mysql = require('../mysql');
 const multer = require('multer');
 const { Router } = require('express');
 const login = require('../middleware/jwt');
+const mongoose = require('mongoose');
 
+
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://localhost:27017');
+
+//formata a data
+function padTo2Digits(num) {
+    return num.toString().padStart(2, '0');
+}
+
+function formatDate(date) {
+    return [
+        padTo2Digits(date.getDate()),
+        padTo2Digits(date.getMonth() + 1),
+        date.getFullYear(),
+    ].join('/');
+}
+
+// cria o Schemma
+const commentSchema = new mongoose.Schema({
+    idproduct: { type: Number, min: 0, required: true },
+    iduser: { type: Number, min: 0, required: true },
+    text: { type: String, required: true },
+    date: { type: String, required: true }
+})
 
 // armazenamento da imagem 
 const storage = multer.diskStorage({
@@ -39,10 +64,8 @@ router.get('/',async(req,res)=>{
             jsonImage.forEach(jsonImage => imgs.push(jsonImage['url']) ); //cria array com as urls das imagens
             jsonProduct[index].images = imgs;
 
-        }
-
         //adiciona estoque
-        for (let index = 0; index <= tamanho; index++) {
+
             const resultStock = await mysql.execute(`select size,quantity from stock where product_idproduct=?;`,[jsonProduct[index]['idproduct']]);
             let stringStock =JSON.stringify(resultStock);
             let jsonStock =JSON.parse(stringStock);
@@ -51,6 +74,11 @@ router.get('/',async(req,res)=>{
             jsonStock.forEach(jsonStock => stocks.push({size:jsonStock['size'],quantity:jsonStock['quantity'] })); //cria array com dados do estoque
             jsonProduct[index].stock = stocks
 
+        //adiciona comentários MongoDB
+            const Comments = mongoose.model('comment', commentSchema, 'comment');
+            const docs = await Comments.find({"idproduct": jsonProduct[index]['idproduct']},{"__v":0}).lean().exec();
+            jsonProduct[index].comments = docs
+            
         }
         
         // constroi o response
@@ -65,7 +93,8 @@ router.get('/',async(req,res)=>{
                     subcategory: product.subcategory,
                     price: product.price,  
                     images: product.images,
-                    stock: product.stock       
+                    stock: product.stock   ,
+                    comments: product.comments    
                 }
             })
         }
@@ -223,33 +252,32 @@ router.patch('/',login.adm,async(req,res)=>{
 
 });
 
-//CADASTRA ESTOQUE
-router.post('/stock', async (req,res)=>{
-    let stringStock =JSON.stringify(req.body);
-    let jsonStock =JSON.parse(stringStock);
-    let stock = [];
-    //cria array com os estoques enviados
-    jsonStock.forEach(jsonStock => 
-        stock.push({
-        productid: jsonStock['productid'],
-        size:jsonStock['size'],
-        quantity:jsonStock['quantity'] 
-    })); 
-    
-
-    stock.forEach(stock => {
-        
-        if(stock['productid'] && stock['quantity'] && stock['size']){
-            console.log('Valido');
-        }else{
-            console.log('Invalido');
+//ATUALIZA ESTOQUE
+router.patch('/stock', async (req,res)=>{
+    let stocks = req.body;
+    let notUpdated = []
+    for (let index = 0; index < stocks.stock.length; index++) {
+        const item = stocks.stock[index];
+        console.log(item.quantity,stocks.idproduct,item.size)
+        const updateStock = await mysql.execute(`update stock set quantity = ? where product_idproduct = ? and size = ?`,[item.quantity,stocks.idproduct,item.size]);
+        console.log(updateStock.affectedRows );
+        if(updateStock.affectedRows == 0){
+            notUpdated.push({size: item.size});
         }
-    });
- 
-    try {
-        res.status(200).send(stock)
-    } catch (error) {
-        res.status(500).send({message: 'Estoque não cadastrado'})
+    }
+    if(notUpdated.length > 0){
+        const response = {
+            message: 'Stock not updated for this product(s)',
+            item: notUpdated.map(not => {
+                return {
+                    size: not.size
+                }
+            })
+        }
+        console.log(response)
+        return res.status(500).send(response);
+    }else{
+        return res.status(200).send({message: 'Stocks updated successfuly'});
     }
 });
 
@@ -273,5 +301,22 @@ router.post('/images',login.adm,upload.single('image'), async(req,res)=>{
     
 
 });
+
+router.post('/comment', async (req, res) => {
+    console.log(req.body);
+    const {idproduct,iduser,text } = req.body;
+    const date = formatDate(new Date());
+    const Comments = mongoose.model('comment', commentSchema, 'comment');
+    const comment = new Comments({ idproduct,iduser, text, date });
+    try {
+      const insertComment =  await comment.save();
+      //.then(res => console.log(res));
+        return res.status(201).send('Comment created: \n'+insertComment);
+    } catch (err) {
+        return res.status(500).send('Comment not created :' + err);
+    }
+});
+
+
 
 module.exports = router;

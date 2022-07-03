@@ -7,57 +7,127 @@ const login = require('../middleware/jwt');
 router.get('/',login.login, async(req,res,next)=>{
     try {
         if (req.body.iduser){
-            const selectOrders =  await mysql.execute(`SELECT * FROM exotica_db.order WHERE USER_IDUSER = ? ;`,
+            let selectOrders =  await mysql.execute(`SELECT * FROM exotica_db.order WHERE USER_IDUSER = ?;`,
             [req.body.iduser]);
             if(selectOrders.length >0){
-               // console.log(selectOrders);
-                let pedido_produto = [];
                 
                 for (let index = 0; index < selectOrders.length; index++) {
-                    pedido_produto = [...selectOrders];
-                    console.log(pedido_produto[index]);
-                    const addProducts = await mysql.execute(`SELECT * FROM product_has_order WHERE order_idorder = ? `,
-                    [selectOrders[index].idorder]);
-                    if(addProducts.length>0){
-                    
-                       // let products = await mysql.execute(`SELET * FROM PRODUCT WHERE IDPRODUCT = ?`,[addProducts.idproduct]);
-                        //console.log("size do produto: "+products.size);
-                                            }
-                     
-                }
-                console.log(pedido_produto[0]);
-                return res.status(200).send({message: 'Order: '+selectOrders.length});
-            }else{
-                return res.status(404).send({message: 'No orders found '});
-            }
+                        // insere o endereço
+                        const selectOrderAddress = await mysql.execute(`select * from address where idaddress = ?`,
+                        [selectOrders[index].address_idaddress]);
+                        if (selectOrderAddress.length > 0){
+                            selectOrders[index].shipping_address = {
+                                name: selectOrderAddress[0].name,
+                                address: selectOrderAddress[0].address,
+                                district: selectOrderAddress[0].district,
+                                city: selectOrderAddress[0].city,
+                                state: selectOrderAddress[0].state,
+                                country: selectOrderAddress[0].country,
+                                cep: selectOrderAddress[0].cep,
+                                status: selectOrderAddress[0].status
+                            };
+    
+                        }else{
+                            selectOrders[index].shipping_address = {};
+                        }
+
+                        // insere método de pagamento
+                        const selectPaymentMethod = await mysql.execute(`select * from payment_method where idpayment_method = ?`,
+                        [selectOrders[index].payment_method_idpayment_method]);
+                        if(selectPaymentMethod.length >0){
+                            selectOrders[index].payment = {
+                                type: selectPaymentMethod[0].type,
+                                cardNumber: selectPaymentMethod[0].cardName,
+                                expirationMonth: selectPaymentMethod[0].expirationMonth,
+                                expirationYear: selectPaymentMethod[0].expirationYear,
+                                portion: selectPaymentMethod[0].portion,
+                                pix_key: selectPaymentMethod[0].pix_key,
+                                boleto_number: selectPaymentMethod[0].boleto_number
+                            };
+                        }else{
+                            selectOrders[index].payment = {};
+                        }
+                        // insere itens do pedido
+                        const selectOrderItens = await mysql.execute(`select idproduct,name,category,subcategory,description,price,order_idorder,quantity,size from product inner join product_has_order 
+                        on product.idproduct = product_has_order.product_idproduct where order_idorder = ?;`,[selectOrders[index].idorder])
+                        
+                        //console.log(selectOrderItens.length);
+                        if(selectOrderItens.length>0){
+                          //  console.table(selectOrderItens);
+                            let itens = [];
+                            let orderItem = {};
+                            console.log(selectOrderItens.length)
+                            for (let index2 = 0; index2 < selectOrderItens.length; index2++) {
+                                const item = selectOrderItens[index2];
+                                const selectImage = await mysql.execute(`SELECT url from image where product_idproduct = ?`,[item.idproduct]);
+                                let image;
+                                if(selectImage.length >0 ){
+                                    image = selectImage[0].url;
+                                    console.log(image); 
+                                }
+                                
+                                console.log(item);
+                                
+                                orderItem = {
+                                    idproduct: item.idproduct,
+                                    image: image,
+                                    name: item.name,
+                                    category: item.category,
+                                    subcategory: item.subcategory,
+                                    description: item.description,
+                                    price: item.price,
+                                    itemPrice: item.price * item.quantity,
+                                    quantity: item.quantity,
+                                    size: item.size
+                                };
+                                itens.push(orderItem);                                
+                            }
+                            console.table(itens)
+                            selectOrders[index].products = itens;
 
 
-            // CONSTROI RESPONSE
-            const response = {
-                status: 201,
-                product: orders.map(orders =>{
+                        }else{
+                            selectOrders[index].products = [];
+                        }
+
+                        
+
+
+
+                }// fim do primeiro for
+               
+                const orders = {
+                    orders: selectOrders.map(order  =>{
                     return {
-                        idproduct: order.idproduct,
-                        name: product.name,
-                        description: product.description,
-                        category: product.category, 
-                        price: product.price,
-                        status: product.status,
-                        stock: stock ? stock :'no stock'     
+                        idorder: order.idorder,
+                        status: order.status,
+                        date: order.date,
+                        shipping_price: order.shipping_price,
+                        total_price: order.total_price,
+                        shipping_address: order.shipping_address,
+                        payment: order.payment,
+                        products: order.products
                     }
                 })
-
             }
-            
+
+                
+            //console.log(orders.orders);
+                return res.status(200).send(orders);
+            }else{
+                return res.status(404).send({message: 'No orders found '});
+            }            
+        }else{
+            return res.status(404).send({message: 'No userid found '});
         }
     } catch (error) {
+        console.log(error);
         return res.status(500).send({error:' Erro : ' + error});
     }
     
     
     
 });
-
 
 // CADASTRO DE PEDIDO 
 router.post('/',login.login,async(req,res,next)=>{
@@ -197,8 +267,6 @@ router.post('/',login.login,async(req,res,next)=>{
 
     
 });
-
-
 
 
 module.exports = router;

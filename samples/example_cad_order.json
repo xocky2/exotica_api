@@ -1,0 +1,30 @@
+{
+    "iduser": 1,
+    "status": "WPAYMENT",
+    "date": "2022-06-28",
+    "shipping_price": 10.00,
+    "total_price": 200.00,
+    "user_address_id": 10,
+    "pay": {
+        "type": "BOLETO",
+        "cardNumber": "00000000000",
+        "cardName":"Nubank cartão",
+        "expirationMonth": "10",
+        "expirationYear":"25",
+        "portion": 2,
+        "pix_key":"1599825188"
+    },
+    "products": [
+        {
+         "idproduct": 1,
+         "quantity": 2,
+         "size": "G"
+        },
+        {
+         "idproduct": 1,
+         "quantity": 2,
+         "size": "M"
+        }
+]
+
+}

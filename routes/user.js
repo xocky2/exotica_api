@@ -4,10 +4,6 @@ const mysql = require('../mysql');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-// RETORNA TODOS USUÁRIOS OU SOMENTE UM USUÁRIO
-router.get('/', async(req,res,next)=>{
-    
-});
 // CADASTRA USUÁRIO E ENDEREÇO  
 router.post('/', async(req,res,next)=>{
     try {
