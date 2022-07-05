@@ -27,6 +27,7 @@ function formatDate(date) {
 const commentSchema = new mongoose.Schema({
     idproduct: { type: Number, min: 0, required: true },
     iduser: { type: Number, min: 0, required: true },
+    name: { type: String, required: true },
     text: { type: String, required: true },
     date: { type: String, required: true }
 })
@@ -304,10 +305,10 @@ router.post('/images',login.adm,upload.single('image'), async(req,res)=>{
 
 router.post('/comment', async (req, res) => {
     console.log(req.body);
-    const {idproduct,iduser,text } = req.body;
+    const {idproduct,iduser,name,text } = req.body;
     const date = formatDate(new Date());
     const Comments = mongoose.model('comment', commentSchema, 'comment');
-    const comment = new Comments({ idproduct,iduser, text, date });
+    const comment = new Comments({ idproduct,iduser,name, text, date });
     try {
       const insertComment =  await comment.save();
       //.then(res => console.log(res));

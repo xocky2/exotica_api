@@ -3,12 +3,13 @@ const router = express.Router();
 const mysql = require('../mysql');
 const login = require('../middleware/jwt');
 
+
 // RETORNA TODOS PEDIDOS POR EMAIL DO USER
-router.get('/',login.login, async(req,res,next)=>{
+router.get('/:iduser', async(req,res,next)=>{
     try {
-        if (req.body.iduser){
+        if (req.params.iduser){
             let selectOrders =  await mysql.execute(`SELECT * FROM exotica_db.order WHERE USER_IDUSER = ?;`,
-            [req.body.iduser]);
+            [req.params.iduser]);
             if(selectOrders.length >0){
                 
                 for (let index = 0; index < selectOrders.length; index++) {
@@ -21,7 +22,7 @@ router.get('/',login.login, async(req,res,next)=>{
                                 address: selectOrderAddress[0].address,
                                 district: selectOrderAddress[0].district,
                                 city: selectOrderAddress[0].city,
-                                state: selectOrderAddress[0].state,
+                                state: selectOrderAddress[0].state, 
                                 country: selectOrderAddress[0].country,
                                 cep: selectOrderAddress[0].cep,
                                 status: selectOrderAddress[0].status
@@ -51,22 +52,18 @@ router.get('/',login.login, async(req,res,next)=>{
                         const selectOrderItens = await mysql.execute(`select idproduct,name,category,subcategory,description,price,order_idorder,quantity,size from product inner join product_has_order 
                         on product.idproduct = product_has_order.product_idproduct where order_idorder = ?;`,[selectOrders[index].idorder])
                         
-                        //console.log(selectOrderItens.length);
                         if(selectOrderItens.length>0){
-                          //  console.table(selectOrderItens);
                             let itens = [];
                             let orderItem = {};
-                            console.log(selectOrderItens.length)
                             for (let index2 = 0; index2 < selectOrderItens.length; index2++) {
                                 const item = selectOrderItens[index2];
                                 const selectImage = await mysql.execute(`SELECT url from image where product_idproduct = ?`,[item.idproduct]);
                                 let image;
                                 if(selectImage.length >0 ){
                                     image = selectImage[0].url;
-                                    console.log(image); 
+                            
                                 }
-                                
-                                console.log(item);
+
                                 
                                 orderItem = {
                                     idproduct: item.idproduct,
@@ -82,7 +79,6 @@ router.get('/',login.login, async(req,res,next)=>{
                                 };
                                 itens.push(orderItem);                                
                             }
-                            console.table(itens)
                             selectOrders[index].products = itens;
 
 
@@ -112,13 +108,13 @@ router.get('/',login.login, async(req,res,next)=>{
             }
 
                 
-            //console.log(orders.orders);
+        
                 return res.status(200).send(orders);
             }else{
                 return res.status(404).send({message: 'No orders found '});
             }            
         }else{
-            return res.status(404).send({message: 'No userid found '});
+            return res.status(404).send({message: 'No iduser found '});
         }
     } catch (error) {
         console.log(error);
@@ -131,7 +127,6 @@ router.get('/',login.login, async(req,res,next)=>{
 
 // CADASTRO DE PEDIDO 
 router.post('/',login.login,async(req,res,next)=>{
-    console.log(req.user);
     try {
         if(req.body.iduser){
             let testStock = req.body.products;
@@ -148,7 +143,6 @@ router.post('/',login.login,async(req,res,next)=>{
                 }
                 
             }
-            console.log(invalidStock);
             // retorna os itens que não tem estoque
             if(invalidStock.length){
                 const response = {
@@ -211,9 +205,7 @@ router.post('/',login.login,async(req,res,next)=>{
 
                                 }else{return  res.status(500).send({message: 'Address not inserted !' });}
                             }
-                           // console.log(insertOrder1 ? insertOrder1.insertedId: insertOrder2.insertedId);
                             let idorder = insertOrder1 ? insertOrder1.insertId: insertOrder2.insertId;
-                            console.log(idorder)
                             if(idorder){
                                 // adiciona itens ao pedido e remove estoque
                                let itens =  req.body.products;
@@ -228,8 +220,9 @@ router.post('/',login.login,async(req,res,next)=>{
                                     const selectQuantity = await mysql.execute(`SELECT quantity FROM stock WHERE PRODUCT_IDPRODUCT = ? AND SIZE = ?`,
                                     [itens[index]['idproduct'],itens[index]['size']]);
                                     let curbal = selectQuantity[0].quantity - itens[index].quantity;
-                                    console.log(`Item: ${itens[index]['idproduct']}\nTamanho: ${itens[index]['size']}\nSaldo anterior :${selectQuantity[0].quantity}\nQuantidade pedido: ${itens[index].quantity}\nSaldo atual: ${curbal}`) 
-                                     const updateStock = await mysql.execute(`UPDATE stock SET QUANTITY = ? WHERE PRODUCT_IDPRODUCT = ? AND SIZE = ?`,
+                                   // console.log(`Item: ${itens[index]['idproduct']}\nTamanho: ${itens[index]['size']}\nSaldo anterior :${selectQuantity[0].quantity}\nQuantidade pedido: ${itens[index].quantity}\nSaldo atual: ${curbal}`) 
+                                    
+                                    const updateStock = await mysql.execute(`UPDATE stock SET QUANTITY = ? WHERE PRODUCT_IDPRODUCT = ? AND SIZE = ?`,
                                      [curbal,
                                      itens[index]['idproduct'],
                                      itens[index]['size']]);
@@ -246,6 +239,7 @@ router.post('/',login.login,async(req,res,next)=>{
 
                         return  res.status(200).send('teste   '+ insertPaymentMethod.insertId);
                 } catch (error) {
+                    console.log(error)
                     return  res.status(500).send({
                         message: 'Order not registred !'+error  
                     });

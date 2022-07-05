@@ -1,6 +1,6 @@
 const mysql = require('mysql');
 
-//LOCAL CONNECTION 
+// LOCAL CONNECTION 
  var pool = mysql.createPool({
     "user": "root",
     "password": "",
