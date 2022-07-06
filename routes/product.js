@@ -303,6 +303,7 @@ router.post('/images',login.adm,upload.single('image'), async(req,res)=>{
 
 });
 
+//CADASTRA COMENTARIO
 router.post('/comment', async (req, res) => {
     console.log(req.body);
     const {idproduct,iduser,name,text } = req.body;

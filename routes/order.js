@@ -4,6 +4,19 @@ const mysql = require('../mysql');
 const login = require('../middleware/jwt');
 
 
+//formata a data
+function padTo2Digits(num) {
+    return num.toString().padStart(2, '0');
+}
+
+function formatDate(date) {
+    return [
+        padTo2Digits(date.getDate()),
+        padTo2Digits(date.getMonth() + 1),
+        date.getFullYear(),
+    ].join('/');
+}
+
 // RETORNA TODOS PEDIDOS POR EMAIL DO USER
 router.get('/:iduser', async(req,res,next)=>{
     try {
@@ -97,7 +110,7 @@ router.get('/:iduser', async(req,res,next)=>{
                     return {
                         idorder: order.idorder,
                         status: order.status,
-                        date: order.date,
+                        date: formatDate(order.date),
                         shipping_price: order.shipping_price,
                         total_price: order.total_price,
                         shipping_address: order.shipping_address,
