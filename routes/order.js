@@ -233,7 +233,7 @@ router.post('/',login.login,async(req,res,next)=>{
                                     const selectQuantity = await mysql.execute(`SELECT quantity FROM stock WHERE PRODUCT_IDPRODUCT = ? AND SIZE = ?`,
                                     [itens[index]['idproduct'],itens[index]['size']]);
                                     let curbal = selectQuantity[0].quantity - itens[index].quantity;
-                                   // console.log(`Item: ${itens[index]['idproduct']}\nTamanho: ${itens[index]['size']}\nSaldo anterior :${selectQuantity[0].quantity}\nQuantidade pedido: ${itens[index].quantity}\nSaldo atual: ${curbal}`) 
+                                
                                     
                                     const updateStock = await mysql.execute(`UPDATE stock SET QUANTITY = ? WHERE PRODUCT_IDPRODUCT = ? AND SIZE = ?`,
                                      [curbal,
@@ -257,8 +257,7 @@ router.post('/',login.login,async(req,res,next)=>{
                         message: 'Order not registred !'+error  
                     });
                 }
-               // return  res.status(200).send('a');
-                
+      
             }
         
         }
@@ -268,12 +267,7 @@ router.post('/',login.login,async(req,res,next)=>{
             
         });
     }
-
-
-
-
     
 });
-
 
 module.exports = router;

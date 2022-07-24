@@ -95,8 +95,6 @@ router.post('/login', async(req,res,next)=>{
                             cpf: validateUser.cpf,
                             status: validateUser.status,
                             address: address
-
-
                         }
                 })}
                 return res.status(200).send(response);
@@ -112,14 +110,12 @@ router.post('/login', async(req,res,next)=>{
           
     } catch (error) {
         res.status(500).send({message: 'Error : '+error});
-    }
-    
+    }    
 });
 
 // LOGOUT DO USUÁRIO
 router.post('/logout', function(req, res) {
     res.json({ auth: false, token: null });
 })
-
 
 module.exports = router;
