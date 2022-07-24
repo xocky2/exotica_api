@@ -242,10 +242,6 @@ router.patch('/',login.adm,async(req,res)=>{
                     response: "Product not updated",
                 });
             }
-
-
-
-
         }
     } catch (error) {
         return res.status(500).send({response:"Error : "+error});
@@ -297,10 +293,6 @@ router.post('/images',login.adm,upload.single('image'), async(req,res)=>{
         console.log(error);
         return  res.status(500).send({message: 'Error on upload image'+error});
     }
-
-
-    
-
 });
 
 //CADASTRA COMENTARIO
@@ -312,13 +304,10 @@ router.post('/comment', async (req, res) => {
     const comment = new Comments({ idproduct,iduser,name, text, date });
     try {
       const insertComment =  await comment.save();
-      //.then(res => console.log(res));
         return res.status(201).send('Comment created: \n'+insertComment);
     } catch (err) {
         return res.status(500).send('Comment not created :' + err);
     }
 });
-
-
 
 module.exports = router;
